@@ -49,6 +49,32 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  op-nethermind:
+    build:
+      context: .
+      dockerfile: docker/dockerfiles/Dockerfile.nethermind
+    restart: unless-stopped
+    stop_grace_period: 5m
+    env_file:
+      - ./envs/${NETWORK_NAME}/op-geth.env
+      - .env
+    volumes:
+      - ./envs/${NETWORK_NAME}/config:/chainconfig
+      - ./scripts/:/scripts
+      - shared:/shared
+      - op_nethermind:/nethermind
+      - torrent_downloads:/downloads
+      - ./.upgrade-pectra:/upgrade-pectra
+    ports:
+      - ${PORT__OP_NETHERMIND_HTTP:-9995}:8545
+      - ${PORT__OP_NETHERMIND_WS:-9996}:8546
+      - ${PORT__OP_NETHERMIND_AUTHRPC:-8551}:8551
+      - ${PORT__OP_NETHERMIND_METRICS:-6060}:6060
+      - ${PORT__OP_NETHERMIND_DISCOVERY:-30303}:30303/udp
+      - ${PORT__OP_NETHERMIND_DISCOVERY:-30303}:30303/tcp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   op-node:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.0
     restart: unless-stopped
@@ -126,4 +152,5 @@ volumes:
   influxdb_data:
   shared:
   op_geth:
+  op_nethermind:
   torrent_downloads:
