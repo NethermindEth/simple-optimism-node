@@ -32,20 +32,23 @@ services:
     restart: unless-stopped
     stop_grace_period: 5m
     entrypoint: /scripts/start-op-geth.sh
+    profiles:
+      - ${EXECUTION_CLIENT:-op-geth}
     env_file:
       - ./envs/${NETWORK_NAME}/op-geth.env
       - .env
     volumes:
-      - ./envs/${NETWORK_NAME}/config:/chainconfig
-      - ./scripts/:/scripts
-      - shared:/shared
+      - ./scripts:/scripts:ro
       - op_geth:/geth
+      - shared:/shared
+      - torrent_downloads:/downloads
       - ./.upgrade-pectra:/upgrade-pectra
     ports:
       - ${PORT__OP_GETH_HTTP:-9993}:8545
       - ${PORT__OP_GETH_WS:-9994}:8546
-      - ${PORT__OP_GETH_P2P:-39393}:${PORT__OP_GETH_P2P:-39393}/udp
-      - ${PORT__OP_GETH_P2P:-39393}:${PORT__OP_GETH_P2P:-39393}/tcp
+      - ${PORT__OP_GETH_METRICS:-6061}:6060
+      - ${PORT__OP_GETH_P2P:-30303}:30303
+      - ${PORT__OP_GETH_P2P:-30303}:30303/udp
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -55,21 +58,22 @@ services:
       dockerfile: docker/dockerfiles/Dockerfile.nethermind
     restart: unless-stopped
     stop_grace_period: 5m
+    profiles:
+      - ${EXECUTION_CLIENT:-op-geth}
     env_file:
-      - ./envs/${NETWORK_NAME}/op-geth.env
+      - ./envs/${NETWORK_NAME}/nethermind.env
       - .env
     volumes:
-      - ./envs/${NETWORK_NAME}/config:/chainconfig
-      - ./scripts/:/scripts
-      - shared:/shared
+      - ./scripts:/scripts:ro
       - op_nethermind:/nethermind
+      - shared:/shared
       - torrent_downloads:/downloads
       - ./.upgrade-pectra:/upgrade-pectra
     ports:
-      - ${PORT__OP_NETHERMIND_HTTP:-9995}:8545
-      - ${PORT__OP_NETHERMIND_WS:-9996}:8546
+      - ${PORT__OP_NETHERMIND_HTTP:-9995}:9995
+      - ${PORT__OP_NETHERMIND_WS:-9996}:9996
       - ${PORT__OP_NETHERMIND_AUTHRPC:-8551}:8551
-      - ${PORT__OP_NETHERMIND_METRICS:-6060}:6060
+      - ${PORT__OP_NETHERMIND_METRICS:-6062}:6060
       - ${PORT__OP_NETHERMIND_DISCOVERY:-30303}:30303/udp
       - ${PORT__OP_NETHERMIND_DISCOVERY:-30303}:30303/tcp
     extra_hosts:
