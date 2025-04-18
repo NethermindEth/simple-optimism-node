@@ -32,8 +32,8 @@ services:
     restart: unless-stopped
     stop_grace_period: 5m
     entrypoint: /scripts/start-op-geth.sh
-    profiles:
-      - ${EXECUTION_CLIENT:-op-geth}
+    profiles: 
+      - geth
     env_file:
       - ./envs/${NETWORK_NAME}/op-geth.env
       - .env
@@ -48,6 +48,8 @@ services:
       - ${PORT__OP_GETH_WS:-9994}:8546
       - ${PORT__OP_GETH_P2P:-39393}:${PORT__OP_GETH_P2P:-39393}/udp
       - ${PORT__OP_GETH_P2P:-39393}:${PORT__OP_GETH_P2P:-39393}/tcp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   op-nethermind:
     build:
@@ -56,7 +58,7 @@ services:
     restart: unless-stopped
     stop_grace_period: 5m
     profiles:
-      - ${EXECUTION_CLIENT:-op-geth}
+      - nethermind
     env_file:
       - ./envs/${NETWORK_NAME}/nethermind.env
       - .env
@@ -73,6 +75,8 @@ services:
       - ${PORT__OP_NETHERMIND_METRICS:-6062}:6060
       - ${PORT__OP_NETHERMIND_DISCOVERY:-30303}:30303/udp
       - ${PORT__OP_NETHERMIND_DISCOVERY:-30303}:30303/tcp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   op-node:
     image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.0
